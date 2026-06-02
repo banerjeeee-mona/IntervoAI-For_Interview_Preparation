@@ -9,11 +9,12 @@ import { ParsedResumeData } from './ResumeUploadPage';
 interface InterviewScreenProps {
   interviewId: string;
   role: InterviewRole;
+  sessionId: string;
   parsedData?: ParsedResumeData;
   onEndInterview: () => void;
 }
 
-export function InterviewScreen({ interviewId, role, parsedData, onEndInterview }: InterviewScreenProps) {
+export function InterviewScreen({ interviewId, role, sessionId, parsedData, onEndInterview }: InterviewScreenProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
@@ -127,6 +128,7 @@ export function InterviewScreen({ interviewId, role, parsedData, onEndInterview 
         interview_id: interviewId,
         role: 'ai',
         content: question,
+        session_id: sessionId,
       })
       .select()
       .single();
@@ -193,6 +195,7 @@ export function InterviewScreen({ interviewId, role, parsedData, onEndInterview 
         interview_id: interviewId,
         role: 'user',
         content: currentTranscript,
+        session_id: sessionId,
       })
       .select()
       .single();

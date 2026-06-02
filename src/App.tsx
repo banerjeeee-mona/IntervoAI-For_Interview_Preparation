@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LandingPage } from './components/LandingPage';
 import { ResumeUploadPage, ParsedResumeData } from './components/ResumeUploadPage';
 import { PreparationPage } from './components/PreparationPage';
 import { InterviewScreen } from './components/InterviewScreen';
 import { FeedbackDashboard } from './components/FeedbackDashboard';
 import { HistoryPage } from './components/HistoryPage';
-import { supabase } from './lib/supabase';
+import { supabase, initializeSession } from './lib/supabase';
 import { AppPage, InterviewRole, ExperienceLevel, InterviewType } from './types';
 
 function App() {
@@ -16,6 +16,16 @@ function App() {
   const [selectedExperience, setSelectedExperience] = useState<ExperienceLevel>('mid');
   const [selectedType, setSelectedType] = useState<InterviewType>('mixed');
   const [parsedData, setParsedData] = useState<ParsedResumeData | undefined>(undefined);
+  const [sessionId, setSessionId] = useState<string>('');
+
+  // Initialize session on app load
+  useEffect(() => {
+    const initSession = async () => {
+      const id = await initializeSession();
+      setSessionId(id);
+    };
+    initSession();
+  }, []);
 
   // Navigation handlers
   const handleNavigateToUpload = () => {
@@ -47,7 +57,7 @@ function App() {
     setSelectedType(type);
     setParsedData(parsed);
 
-    // Create interview record
+    // Create interview record with session_id
     const { data, error } = await supabase
       .from('interviews')
       .insert({
@@ -60,6 +70,7 @@ function App() {
         parsed_education: parsed?.education || [],
         parsed_projects: parsed?.projects || [],
         parsed_profession: parsed?.profession || '',
+        session_id: sessionId,
       })
       .select()
       .single();
